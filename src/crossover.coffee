@@ -53,19 +53,19 @@ class Crossover
       console.log "msg:#{util.inspect(msg)}"
       switch msg.cmd
         when "start"
-          listening = false
+          @listening = false
           dir = msg.dir
           process.env.NODE_PATH = dir
           app = require(dir + "/index")
           app.on "close", ->
             console.log "http connections are done: #{process.pid}"
             process.exit(0)
-          app.use("/bogon", this.admin())
+          app.use("/crossover", this.admin())
           app.listen port, ->
-            listening = true
+            @listening = true
         when "stop"
           unless stopping
-            stopping = true
+            @stopping = true
             console.log "stopping: #{process.pid}"
             app.close() if listening
 

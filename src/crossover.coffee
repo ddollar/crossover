@@ -3,7 +3,7 @@ express = require("express")
 os      = require("os")
 util    = require("util")
 
-module.exports.version = "0.0.2"
+module.exports.version = require("../package.json").version
 
 class Crossover
 

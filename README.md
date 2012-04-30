@@ -12,11 +12,13 @@ Zero-downtime Node.js deployments
 
 ## Installation
 
-    $ npm install -g crossover
+	$ npm install -g crossover
 
 ## Usage
 
-    $ crossover http://crossover-example.s3.amazonaws.com/app1.tgz
+The example app tarball URLs in these examples actually exist. Feel free to use them for testing.
+
+	$ crossover http://crossover-example.s3.amazonaws.com/app1.tgz
 	[master] preparing worker: http://crossover-example.s3.amazonaws.com/app1.tgz
 	[master] resolving dependencies
 	[master] forked worker 51500
@@ -30,13 +32,13 @@ Zero-downtime Node.js deployments
 
 Create a tarball that contains your app.
 
-    $ cd ~/Code/myapp
+	$ cd ~/Code/myapp
 	$ tar czvf ~/Slugs/myapp.tgz .
 
 ## Deploying New Code
 
-    $ curl -X POST https://localhost:3000/crossover/release -d "url=http%3A%2F%2Fcrossover-example.s3.amazonaws.com%2Fapp2.tgz"
-    ok
+	$ curl -X POST https://localhost:3000/crossover/release -d "url=http%3A%2F%2Fcrossover-example.s3.amazonaws.com%2Fapp2.tgz"
+	ok
 
 	# meanwhile on the server	
 	[master] releasing: http://crossover-example.s3.amazonaws.com/app2.tgz
@@ -53,11 +55,11 @@ Create a tarball that contains your app.
 	
 ## Advanced Usage
 
-    Usage: crossover [options] <slug url>
-
-    Options:
-
-      -h, --help               output usage information
-      -V, --version            output the version number
-      -c, --concurrency <num>  number of workers
-      -p, --port <port>        port on which to listen
+	Usage: crossover [options] <slug url>
+	
+	Options:
+	
+	  -h, --help               output usage information
+	  -V, --version            output the version number
+	  -c, --concurrency <num>  number of workers
+	  -p, --port <port>        port on which to listen

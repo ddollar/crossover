@@ -144,3 +144,15 @@ task 'watch', 'compile and watch', -> build true, -> log ":-)", green
 # cake test
 # ```
 task 'test', 'run tests', -> build -> mocha -> log ":)", green
+
+## custom tasks
+
+build_examples = ->
+  fs.readdir __dirname + "/example/", (err, list) ->
+    for item in list.filter ((item) -> !item.match(/\.tgz$/))
+      console.log "building example: #{item}"
+      builder = spawn "tar", ["czf", "../#{item}.tgz", "."], cwd:"#{__dirname}/example/#{item}"
+      builder.stdout.pipe(process.stdout)
+      builder.stderr.pipe(process.stderr)
+
+task 'examples', 'build examples', -> build_examples -> log ":)", green

@@ -37,7 +37,8 @@ Create a tarball that contains your app.
 
 ## Deploying New Code
 
-	$ curl -X POST https://localhost:3000/crossover/release -d "url=http%3A%2F%2Fcrossover-example.s3.amazonaws.com%2Fapp2.tgz"
+	$ curl -X POST https://localhost:3000/crossover/release \
+	    -d "url=http%3A%2F%2Fcrossover-example.s3.amazonaws.com%2Fapp2.tgz"
 	ok
 
 	# meanwhile on the server	

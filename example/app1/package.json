@@ -1,0 +1,11 @@
+{
+  "name":        "heroku-make",
+  "version":     "0.0.1",
+  "dependencies": {
+    "express": "2.x.x"
+  },
+  "engines": {
+    "node": "0.6.12",
+    "npm": "1.1.4"
+  }
+}

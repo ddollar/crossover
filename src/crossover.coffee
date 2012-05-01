@@ -113,7 +113,9 @@ class Crossover
     process.send cmd:"ready"
 
   admin: () ->
-    admin = require("express").createServer(express.bodyParser())
+    admin = require("express").createServer(
+      express.bodyParser(),
+      express.basicAuth("", @options['auth'].toString()))
     admin.post "/release", (req, res) =>
       process.send { cmd:"release", url:req.body.url }
       res.send("ok")

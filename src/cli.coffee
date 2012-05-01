@@ -6,6 +6,7 @@ util      = require("util")
 program
   .version(crossover.version)
   .usage('[options] <slug url>')
+  .option('-a, --auth <password>', 'admin password')
   .option('-c, --concurrency <num>', 'number of workers', os.cpus().length)
   .option('-p, --port <port>', 'port on which to listen', 3000)
 

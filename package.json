@@ -1,6 +1,6 @@
 {
   "name":    "crossover",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "author":  "David Dollar <ddollar@gmail.com>",
 
   "description": "zero-downtime deployments",

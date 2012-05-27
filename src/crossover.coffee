@@ -20,21 +20,38 @@ class Crossover
     @workers = []
     @root = temp.mkdirSync("crossover")
 
-  prepare_worker: (dir, cb) =>
+  prepare_worker: (slug, env, cb) =>
     target = @root + "/" + uuid.v1()
-    this.log "preparing worker: #{dir}"
+    this.log "preparing worker: #{slug}"
+    @read_env env, (env) =>
+      if slug.substring(0,4) == "http"
+        rest.get(slug, decoding:"buffer").on "complete", (result) =>
+          fs.mkdir target, (err) =>
+            fs.writeFile target + "/app.tgz", result, "binary", (err) =>
+              this.execute "tar", ["xzf", "app.tgz"], cwd:target, =>
+                this.prepare_npm target, (target) ->
+                  cb(target, env)
+      else
+        wrench.copyDirSyncRecursive(slug, target)
+        this.prepare_npm target, (target) ->
+          cb(target, env)
 
-    if dir.substring(0,4) == "http"
-      rest.get(dir, decoding:"buffer").on "complete", (result) =>
-        fs.mkdir target, (err) =>
-          fs.writeFile target + "/app.tgz", result, "binary", (err) =>
-            this.execute "tar", ["xzf", "app.tgz"], cwd:target, =>
-              this.prepare_npm target, (target) ->
-                cb(target)
+  read_env: (env, cb) ->
+    if !env
+      cb {}
+    else if env.substring(0,4) == "http"
+      rest.get(env).on "complete", (result) =>
+        cb @read_env_data(result)
     else
-      wrench.copyDirSyncRecursive(dir, target)
-      this.prepare_npm target, (target) ->
-        cb(target)
+      fs.readFile env, (err, data) =>
+        cb @read_env_data(data.toString())
+
+  read_env_data: (data) ->
+    env = {}
+    for line in data.split("\n")
+      parts = line.split("=")
+      env[parts.shift()] = parts.join("=")
+    env
 
   prepare_npm: (target, cb) =>
     this.log "resolving dependencies"
@@ -43,7 +60,10 @@ class Crossover
         cb(target)
 
   spawn_worker: (dir, cb) =>
+    old_env = process.env
+    process.env = @env || {}
     worker = cluster.fork()
+    process.env = old_env
     this.log("forked worker #{worker.pid}")
     worker.on "message", (msg) ->
       if msg.cmd is "ready"
@@ -51,19 +71,21 @@ class Crossover
         cb(this) if cb
     worker.on "message", (msg) =>
       if msg.cmd is "release"
-        this.log "releasing: #{msg.url}"
-        @url = msg.url
-        this.prepare_worker msg.url, (dir) =>
-          @slug = dir
+        this.log "releasing: #{msg.slug}"
+        # @url = msg.slug
+        this.prepare_worker msg.slug, msg.env, (slug, env) =>
+          @slug = slug
+          @env = env
           for worker in @workers
             worker.send cmd:"stop"
 
-  listen: (slug, port) =>
+  listen: (slug, env, port) =>
     this.error("Must specify a slug.") unless slug
     if cluster.isMaster
-      @url = slug
-      this.prepare_worker slug, (dir) =>
-        @slug = dir
+      # @url = slug
+      this.prepare_worker slug, env, (slug, env) =>
+        @slug = slug
+        @env = env
         this.master()
     else
       this.slave(port)
@@ -72,9 +94,6 @@ class Crossover
     for num in [1..@options.concurrency]
       this.spawn_worker @slug, (worker) =>
         @workers.push(worker)
-
-    # kill a worker
-    # setInterval (=> @workers[0].send(cmd:"stop")), 1000
 
     cluster.on "death", (worker) =>
       this.log("worker #{worker.pid} died")
@@ -88,7 +107,6 @@ class Crossover
         when "start"
           this.log "starting app"
           @listening = false
-          process.env.NODE_PATH = msg.dir
           @app = require(msg.dir + "/index")
           @app.on "close", =>
             this.log "requests completed, exiting"
@@ -117,7 +135,7 @@ class Crossover
       express.bodyParser(),
       express.basicAuth("", @options['auth'].toString()))
     admin.post "/release", (req, res) =>
-      process.send { cmd:"release", url:req.body.url }
+      process.send { cmd:"release", slug:req.body.slug, env:req.body.env }
       res.send("ok")
     admin
 

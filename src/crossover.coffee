@@ -134,6 +134,10 @@ class Crossover
     admin = require("express").createServer(
       express.bodyParser(),
       express.basicAuth("", @options['auth'].toString()))
+    admin.get "/status", (req, res) ->
+      res.contentType "application/json"
+      res.send JSON.stringify
+        version: module.exports.version
     admin.post "/release", (req, res) =>
       process.send { cmd:"release", slug:req.body.slug, env:req.body.env }
       res.send("ok")

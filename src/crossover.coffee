@@ -61,8 +61,11 @@ class Crossover
 
   spawn_worker: (dir, cb) =>
     old_env = process.env
+    old_cwd = process.cwd()
     process.env = @env || {}
+    process.chdir(dir)
     worker = cluster.fork()
+    process.chdir(old_cwd)
     process.env = old_env
     this.log("forked worker #{worker.pid}")
     worker.on "message", (msg) ->

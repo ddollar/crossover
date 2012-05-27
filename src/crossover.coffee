@@ -136,7 +136,7 @@ class Crossover
   admin: () ->
     admin = require("express").createServer(
       express.bodyParser(),
-      express.basicAuth("", @options['auth'].toString()))
+      express.basicAuth("admin", @options['auth'].toString()))
     admin.get "/status", (req, res) ->
       res.contentType "application/json"
       res.send JSON.stringify

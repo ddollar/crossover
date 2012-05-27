@@ -7,6 +7,7 @@
   "homepage":    "https://github.com/ddollar/crossover",
   "repository":  "https://github.com/ddollar/crossover.git",
 
+  "bin":  "./bin/crossover",
   "main": "./lib/crossover",
 
   "dependencies": {

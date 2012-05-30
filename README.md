@@ -22,7 +22,7 @@ The example app tarball URLs in these examples actually exist. Feel free to use 
 	[master] preparing worker: http://crossover-example.s3.amazonaws.com/app1.tgz
 	[master] resolving dependencies
 	[master] forked worker 51500
-	[master] forked worker 51501	
+	[master] forked worker 51501
 	[worker:51500] starting app
 	[worker:51501] starting app
 	[worker:51500] listening on port: 3000
@@ -41,7 +41,7 @@ Create a tarball that contains your app.
 	    -d "url=http%3A%2F%2Fcrossover-example.s3.amazonaws.com%2Fapp2.tgz"
 	ok
 
-	# meanwhile on the server	
+	# meanwhile on the server
 	[master] releasing: http://crossover-example.s3.amazonaws.com/app2.tgz
 	[master] preparing worker: http://crossover-example.s3.amazonaws.com/app2.tgz
 	[master] resolving dependencies
@@ -53,14 +53,16 @@ Create a tarball that contains your app.
 	[master] forked worker 52000
 	[master] worker 51501 died
 	[master] forked worker 52001
-	
+
 ## Advanced Usage
 
 	Usage: crossover [options] <slug url>
-	
+
 	Options:
-	
-	  -h, --help               output usage information
-	  -V, --version            output the version number
-	  -c, --concurrency <num>  number of workers
-	  -p, --port <port>        port on which to listen
+
+		-h, --help               output usage information
+		-V, --version            output the version number
+		-a, --auth <password>    admin password
+		-c, --concurrency <num>  number of workers
+		-e, --env <url>          environment file
+		-p, --port <port>        port on which to listen

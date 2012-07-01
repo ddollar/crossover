@@ -72,20 +72,13 @@ class Crossover
       if msg.cmd is "ready"
         this.send { cmd:"start", dir:dir }
         cb(this) if cb
-    worker.on "message", (msg) =>
-      if msg.cmd is "release"
-        this.log "releasing: #{msg.slug}"
-        # @url = msg.slug
-        this.prepare_worker msg.slug, msg.env, (slug, env) =>
-          @slug = slug
-          @env = env
-          for worker in @workers
-            worker.send cmd:"stop"
 
   listen: (slug, env, port) =>
     this.error("Must specify a slug.") unless slug
     if cluster.isMaster
       # @url = slug
+      this.admin().listen @options["managementPort"], =>
+        console.log "[master] listening on management port: #{@options["managementPort"]}"
       this.prepare_worker slug, env, (slug, env) =>
         @slug = slug
         @env = env
@@ -114,7 +107,6 @@ class Crossover
           @app.on "close", =>
             this.log "requests completed, exiting"
             process.exit(0)
-          @app.use("/crossover", this.admin())
           @app.listen port, =>
             this.log "listening on port: #{port}"
             @listening = true
@@ -136,13 +128,19 @@ class Crossover
   admin: () ->
     admin = require("express").createServer(
       express.bodyParser(),
-      express.basicAuth("admin", @options['auth'].toString()))
+      express.basicAuth("admin", (@options['auth'] || "").toString()))
     admin.get "/status", (req, res) ->
       res.contentType "application/json"
       res.send JSON.stringify
         version: module.exports.version
     admin.post "/release", (req, res) =>
-      process.send { cmd:"release", slug:req.body.slug, env:req.body.env }
+      slug = req.body.slug
+      env  = req.body.env
+      @log "releasing: #{slug} #{env}"
+      @prepare_worker slug, env, (slug, env) =>
+        @slug = slug
+        @env  = env
+        worker.send cmd:"stop" for worker in @workers
       res.send("ok")
     admin
 

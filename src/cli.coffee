@@ -9,7 +9,8 @@ program
   .option('-a, --auth <password>', 'admin password')
   .option('-c, --concurrency <num>', 'number of workers', os.cpus().length)
   .option('-e, --env <url>', 'environment file')
-  .option('-p, --port <port>', 'port on which to listen', 3000)
+  .option('-m, --management-port <num>', 'management port', 3000)
+  .option('-p, --port <port>', 'port on which to listen', 5000)
 
 module.exports.execute = (args) ->
   program.parse(args)

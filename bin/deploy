@@ -1,0 +1,5 @@
+#!/bin/sh
+curl -X POST http://localhost:3000/release \
+  -u "admin:" \
+  -d "slug=%2FUsers%2Fdavid%2FCode%2Fproximo" \
+  -d "env=%2FUsers%2Fdavid%2FCode%2Fproximo%2F.env"

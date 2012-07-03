@@ -98,7 +98,7 @@ class Crossover
       this.spawn_worker @slug, (worker) =>
         @workers.push(worker)
 
-    cluster.on "death", (worker) =>
+    cluster.on "exit", (worker) =>
       this.log("worker #{worker.pid} died")
       @workers.splice(@workers.indexOf(worker), 1)
       this.spawn_worker @slug, (worker) =>

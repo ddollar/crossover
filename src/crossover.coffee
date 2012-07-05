@@ -1,4 +1,5 @@
 cluster = require("cluster")
+domain  = require("domain")
 express = require("express")
 fs      = require("fs")
 os      = require("os")
@@ -67,16 +68,32 @@ class Crossover
     worker = cluster.fork()
     process.chdir(old_cwd)
     process.env = old_env
-    this.log("forked worker #{worker.pid}")
+    this.log("forked worker #{worker.process.pid}")
     worker.on "message", (msg) ->
       if msg.cmd is "ready"
         this.send { cmd:"start", dir:dir }
         cb(this) if cb
 
+  test_worker: (dir, env, cb) =>
+    old_env = process.env
+    old_cwd = process.cwd()
+    process.env = @env || {}
+    process.chdir(dir)
+    worker = cluster.fork()
+    process.chdir(old_cwd)
+    process.env = old_env
+    this.log("forked worker #{worker.process.pid}")
+    worker.on "message", (msg) ->
+      if msg.cmd is "ready"
+        this.send { cmd:"test", dir:dir }
+      else if msg.cmd is "success"
+        cb null
+      else if msg.cmd is "failure"
+        cb msg.err
+
   listen: (slug, env, port) =>
     this.error("Must specify a slug.") unless slug
     if cluster.isMaster
-      # @url = slug
       this.admin().listen @options["managementPort"], =>
         console.log "[master] listening on management port: #{@options["managementPort"]}"
       this.prepare_worker slug, env, (slug, env) =>
@@ -110,6 +127,15 @@ class Crossover
           @app.listen port, =>
             this.log "listening on port: #{port}"
             @listening = true
+        when "test"
+          this.log "launching test app from slug"
+          try
+            @app = require(msg.dir + "/index")
+            @app.listen 0, =>
+              process.send cmd:"success"
+          catch err
+            process.send cmd:"failure", err:err.toString()
+
         when "stop"
           unless @stopping
             @stopping = true
@@ -134,14 +160,27 @@ class Crossover
       res.send JSON.stringify
         version: module.exports.version
     admin.post "/release", (req, res) =>
-      slug = req.body.slug
-      env  = req.body.env
-      @log "releasing: #{slug} #{env}"
-      @prepare_worker slug, env, (slug, env) =>
-        @slug = slug
-        @env  = env
-        worker.send cmd:"stop" for worker in @workers
-      res.send("ok")
+      dom = domain.create()
+      dom.on "error", (err) =>
+        @log "failed to launch: #{err}"
+        res.writeHead 403
+        res.end "error"
+      dom.run =>
+        slug = req.body.slug
+        env  = req.body.env
+        @log "releasing: #{slug} #{env}"
+        @prepare_worker slug, env, (slug, env) =>
+          @test_worker slug, env, (err) =>
+            if err
+              @log "error in slug, aborting spawn: #{err}"
+              res.writeHead 403
+              res.end "error"
+            else
+              @log "test successful"
+              @slug = slug
+              @env  = env
+              worker.send cmd:"stop" for worker in @workers
+              res.send("ok")
     admin
 
   format_log: (args) ->

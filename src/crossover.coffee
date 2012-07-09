@@ -158,7 +158,9 @@ class Crossover
     admin.get "/status", (req, res) ->
       res.contentType "application/json"
       res.send JSON.stringify
-        version: module.exports.version
+        version:
+          crossover: module.exports.version
+          node:      process.version
     admin.post "/release", (req, res) =>
       dom = domain.create()
       dom.on "error", (err) =>

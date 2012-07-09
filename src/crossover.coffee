@@ -160,7 +160,7 @@ class Crossover
       res.send JSON.stringify
         version:
           crossover: module.exports.version
-          node:      process.version
+          node:      process.version.substring(1)
     admin.post "/release", (req, res) =>
       dom = domain.create()
       dom.on "error", (err) =>

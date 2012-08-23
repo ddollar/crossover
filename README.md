@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/ddollar/crossover.png)](http://travis-ci.org/ddollar/crossover)
 # Crossover
 
 Zero-downtime Node.js deployments

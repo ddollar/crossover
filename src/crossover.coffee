@@ -19,6 +19,7 @@ class Crossover
     @listening = false
     @stopping = false
     @workers = []
+    @settings = {}
     @root = temp.mkdirSync("crossover")
 
   prepare_worker: (slug, env, cb) =>
@@ -183,6 +184,14 @@ class Crossover
               @env  = env
               worker.send cmd:"stop" for worker in @workers
               res.send("ok")
+    admin.get "/settings/:name", (req, res) =>
+      if @settings[req.params.name]?
+        res.send @settings[req.params.name]
+      else
+        res.send "none"
+    admin.post "/settings/:name/:value", (req, res) =>
+      @settings[req.params.name] = req.params.value
+      res.send "ok"
     admin
 
   format_log: (args) ->

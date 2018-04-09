@@ -1,24 +1,22 @@
 {
-  "name":    "crossover",
-  "version": "0.6.0",
-  "author":  "David Dollar <ddollar@gmail.com>",
-
+  "name": "crossover",
+  "version": "0.7.0",
+  "author": "David Dollar <ddollar@gmail.com>",
   "description": "zero-downtime deployments",
-  "homepage":    "https://github.com/ddollar/crossover",
-  "repository":  "https://github.com/ddollar/crossover.git",
-
-  "bin":  "./bin/crossover",
+  "homepage": "https://github.com/ddollar/crossover",
+  "repository": "https://github.com/ddollar/crossover.git",
+  "bin": "./bin/crossover",
   "main": "./lib/crossover",
-
   "dependencies": {
-    "commander":     "0.6.x",
+    "commander": "0.6.x",
     "coffee-script": "1.3.x",
-    "express":       "2.5.x",
-    "node-uuid":     "1.3.x",
-    "restler":       "2.0.x",
-    "temp":          "0.4.x",
-    "wrench":        "1.3.x"
+    "express": "2.5.x",
+    "node-uuid": "1.3.x",
+    "restler": "3.4.x",
+    "temp": "0.4.x",
+    "wrench": "1.3.x"
   },
-
-  "engines": { "node": ">= 0.8.0" }
+  "engines": {
+    "node": ">= 0.8.0"
+  }
 }

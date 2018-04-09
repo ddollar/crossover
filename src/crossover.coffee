@@ -110,7 +110,10 @@ class Crossover
         @workers.push(worker)
 
     cluster.on "exit", (worker) =>
-      this.log("worker #{worker.pid} died")
+      unless worker.process and worker.process.pid
+        this.log("dead worker had no pid, exiting")
+        process.exit(1)
+      this.log("worker #{worker.process.pid} died")
       @workers.splice(@workers.indexOf(worker), 1)
       this.spawn_worker @slug, (worker) =>
         @workers.push(worker)

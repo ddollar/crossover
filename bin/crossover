@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
 require('coffee-script');
-require('../src/cli').execute(process.argv);
+require('../lib/cli').execute(process.argv);

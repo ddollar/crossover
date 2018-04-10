@@ -21,18 +21,29 @@ class Crossover
     @workers = []
     @settings = {}
     @root = temp.mkdirSync("crossover")
+    @deaths = []
 
   prepare_worker: (slug, env, cb) =>
     target = @root + "/" + uuid.v1()
     this.log "preparing worker: #{slug}"
     @read_env env, (env) =>
       if slug.substring(0,4) == "http"
-        rest.get(slug, decoding:"buffer").on "complete", (result) =>
+        req = rest.get(slug, decoding:"buffer")
+        req.on "success", (data) =>
           fs.mkdir target, (err) =>
-            fs.writeFile target + "/app.tgz", result, "binary", (err) =>
+            fs.writeFile target + "/app.tgz", data, "binary", (err) =>
               this.execute "tar", ["xzf", "app.tgz"], cwd:target, =>
                 this.prepare_npm target, (target) ->
                   cb(target, env)
+        req.on "fail", (data, res) =>
+          @log "error fetching slug: #{res.statusCode}\n#{data}"
+          process.exit(1)
+        req.on "error", (err) =>
+          @log "error fetching slug: #{err}"
+          process.exit(1)
+        req.on "timeout", (data) =>
+          @log "error fetching slug: timeout"
+          process.exit(1)
       else
         wrench.copyDirSyncRecursive(slug, target)
         this.prepare_npm target, (target) ->
@@ -114,6 +125,13 @@ class Crossover
         this.log("dead worker had no pid, exiting")
         process.exit(1)
       this.log("worker #{worker.process.pid} died")
+      @deaths.unshift (new Date())
+      if @deaths.length > 5
+        latest = @deaths.pop()
+        elapsed = (new Date()) - latest
+        if elapsed < 5000
+          @log "5 deaths in 5 seconds, exiting"
+          process.exit(1)
       @workers.splice(@workers.indexOf(worker), 1)
       this.spawn_worker @slug, (worker) =>
         @workers.push(worker)

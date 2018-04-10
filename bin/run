@@ -1,2 +1,2 @@
 #!/bin/bash
-bin/crossover ~/Code/proximo -c 1 -e ~/Code/proximo/.env
+coffee -c -o lib src && bin/crossover ~/Code/proximo -c 1 -e ~/Code/proximo/.env
